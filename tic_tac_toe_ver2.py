@@ -2,7 +2,6 @@
 
 import os
 import time
-import copy
 
 BOARD_SIZE = 3
 BLANK_FIELD = ' '
@@ -17,41 +16,38 @@ class TTTBoard:
 
     # Prints the board with added formatting
     def draw_board(self):
-        board_copy = copy.deepcopy(self.board)
-        for row in board_copy:
+        for row in self.board:
             row = [f'|{field}|' for field in row]
-
             print(''.join(row))
 
-    def pick_field(self, player, row, col):
-        if ((self.board[row][col] == BLANK_FIELD)
-            and (row >= 0 and row < BOARD_SIZE)
-            and (col >= 0 and col < BOARD_SIZE)):
+    def pick_field(self, value, row, col):
+        if ((row >= 0 and row < BOARD_SIZE) and (col >= 0 and col < BOARD_SIZE)
+                and (self.board[row][col] == BLANK_FIELD)):
 
-            self.board[row][col] = player
+            self.board[row][col] = value
             return True
 
     def check_for_winner(self):
         # Horizontal check
         for row in self.board:
-            if row.count(O) >= BOARD_SIZE:
+            if (row.count(O) >= BOARD_SIZE):
                 return O
-            elif row.count(X) >= BOARD_SIZE:
+            elif (row.count(X) >= BOARD_SIZE):
                 return X
 
         # Vertical check
         transposed_board = list(zip(*self.board))
         for column in transposed_board:
-            if column.count(O) >= BOARD_SIZE:
+            if (column.count(O) >= BOARD_SIZE):
                 return O
-            elif column.count(X) >= BOARD_SIZE:
+            elif (column.count(X) >= BOARD_SIZE):
                 return X
 
         #TODO: Diagonal check
 
 
 # Simple cross-platform function to clear the terminal
-def clear():
+def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
@@ -67,7 +63,7 @@ def main():
                 main()
 
             while True:
-                clear()
+                clear_terminal()
                 print(f'Player: {player}\n')
                 Game.draw_board()
 
