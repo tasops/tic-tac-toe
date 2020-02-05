@@ -1,78 +1,86 @@
 #!/usr/bin/env python3
 
 import os
+import time
+
+BOARD_SIZE = 3
+BLANK_FIELD = ' '
+O = 'O'
+X = 'X'
 
 
-field = '| |'
-players = {'X': '|x|', 'O': '|o|'}
-rqd_inrow = 3
-directions = {'horizontal', 'vertical', 'diagonal', 'rev_diagonal'}
+class TTTBoard:
+    def __init__(self):
+        self.players = (O, X)
+        self.board = [[BLANK_FIELD] * BOARD_SIZE for row in range(BOARD_SIZE)]
+
+    # Prints the board with added formatting
+    def draw_board(self):
+        for row in self.board:
+            row = [f'|{field}|' for field in row]
+            print(''.join(row))
+
+    def pick_field(self, value, row, col):
+        if ((row >= 0 and row < BOARD_SIZE) and (col >= 0 and col < BOARD_SIZE)
+                and (self.board[row][col] == BLANK_FIELD)):
+
+            self.board[row][col] = value
+            return True
+
+    def check_for_winner(self):
+        # Horizontal check
+        for row in self.board:
+            if (row.count(O) >= BOARD_SIZE):
+                return O
+            elif (row.count(X) >= BOARD_SIZE):
+                return X
+
+        # Vertical check
+        transposed_board = list(zip(*self.board))
+        for column in transposed_board:
+            if (column.count(O) >= BOARD_SIZE):
+                return O
+            elif (column.count(X) >= BOARD_SIZE):
+                return X
+
+        #TODO: Diagonal check
+        diagonal_line = [self.board[field][field] for field in range(BOARD_SIZE)]
+        rev_diagonal_line = [self.board[(BOARD_SIZE - 1) - field][field] for field in range(BOARD_SIZE)]
+        if (diagonal_line.count(O) >= BOARD_SIZE) or (rev_diagonal_line.count(O) >= BOARD_SIZE):
+            return O
+        elif (diagonal_line.count(X) >= BOARD_SIZE) or (rev_diagonal_line.count(X) >= BOARD_SIZE):
+            return X
+
+
+# Simple cross-platform function to clear the terminal
+def clear_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def main():
-
-    # Create the matrix
-    size = 3
-    grid = [[field] * size for row in range(size)]
+    Game = TTTBoard()
 
     while True:
-        for player in players:
-            # Check the matrix horizontally, vertically and diagonally
-            for direction in directions:
-                for row in range(len(grid)):
-                    # Reset the count when changing the line
-                    x_inline = 0
-                    o_inline = 0
-                    for column in range(len(grid[row])):
-                        # Setup the direction based on picked direction
-                        if direction == 'horizontal':
-                            value = grid[row][column]
-                        elif direction == 'vertical':
-                            value = grid[column][row]
-                        elif direction == 'diagonal':
-                            value = grid[column][column]
-                        elif direction == 'rev_diagonal':
-                            value = grid[(len(grid) - 1) - column][column]
+        for player in Game.players:
 
-                        # Check the field
-                        if value == players.get('X'):
-                            x_inline += 1
-                        elif value == players.get('O'):
-                            o_inline += 1
-                        else:
-                            x_inline = 0
-                            o_inline = 0
-
-                        # If in that direction there is
-                        # required number of valid values in a row, then win
-                        if x_inline == rqd_inrow or o_inline == rqd_inrow:
-                            main()
+            if (winner := Game.check_for_winner()):
+                print(f'{winner} WON!')
+                time.sleep(3)
+                main()
 
             while True:
-                os.system('cls' if os.name == 'nt' else 'clear')
+                clear_terminal()
+                print(f'Player: {player}\n')
+                Game.draw_board()
 
-                # Display whose turn it is
-                print(f'Turn: {player}\'s\n')
-
-                # Print the board with coordinates
-                print(
-                    ' ' + ''.join([f' {column_number} ' for column_number in range(len(grid))]))
-                for row_number, row in enumerate(grid):
-                    print(str(row_number) + ''.join(row))
-
-                # Take input
                 try:
-                    row = int(input('\nRow: '))
-                    column = int(input('Column: '))
+                    sel_row = int(input('Enter row: '))
+                    sel_col = int(input('Enter column: '))
                 except ValueError:
                     continue
-                # Check if input is in range
-                if row < size and row >= 0 and column < size and column >= 0:
-                    # Then check if the choosen field is not occupied
-                    if grid[row][column] == field:
-                        # Draw on a board and give the turn for another player
-                        grid[row][column] = players.get(player)
-                        break
+
+                if Game.pick_field(player, sel_row, sel_col):
+                    break
 
 
 if __name__ == '__main__':
